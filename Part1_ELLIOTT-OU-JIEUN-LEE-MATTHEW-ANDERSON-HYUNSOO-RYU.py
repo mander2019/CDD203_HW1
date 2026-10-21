@@ -12,6 +12,7 @@ import pandas as pd
 from skl2onnx import to_onnx
 from sklearn.metrics import (accuracy_score, average_precision_score, confusion_matrix,
                              f1_score, precision_score, recall_score, roc_auc_score)
+from rdkit import Chem
 
 # TODO 1: your group's names -> Part1_FIRST1-LAST1-FIRST2-LAST2.onnx
 NAME = "ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU"
@@ -19,6 +20,21 @@ NAME = "ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU"
 
 # TODO 2: your own threshold; justify it in README.md
 THRESHOLD = 0.5
+
+
+df = pd.read_csv("data/hw1data.tab", sep="\t")
+df.columns = ["Drug_ID", "Drug", "Y"]
+
+CHAR_TO_NUM = {}
+
+for smst in df["Drug"]:
+    mol = Chem.MolFromSmiles(smst)
+    smst = Chem.MolToSmiles(mol, canonical=True)
+    for char in smst:
+        if char not in CHAR_TO_NUM:
+            CHAR_TO_NUM[char] = len(CHAR_TO_NUM) + 1
+
+MAX_LENGTH = 200
 
 
 def featurize(smiles):
@@ -29,9 +45,16 @@ def featurize(smiles):
     which will need to be pre-approved by Peter if deviating from the
     versions indicated in that file.
     """
+    X = np.zeros((len(smiles),MAX_LENGTH), dtype=np.float32)
 
+    for i, smi in enumerate(smiles):
+        mol = Chem.MolFromSmiles(smi)
+        smi = Chem.MolToSmiles(mol, canonical=True)
+        for j, char in enumerate(smi):
+            X[i, j] = CHAR_TO_NUM[char]
+
+    return X
     
-
     raise NotImplementedError
 
 
