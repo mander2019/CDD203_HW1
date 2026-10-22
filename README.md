@@ -8,14 +8,14 @@ Group member names: Elliott Ou, Jieun Lee, Matthew Anderson, Hyunsoo Ryu
 
 The final model uses a scikit-learn pipeline with `StandardScaler()` followed by `RandomForestClassifier`.
 
-
+'''
 n_estimators = 300
 max_depth = 20
 min_samples_leaf = 2
 class_weight = balanced
 random_state = 42
 threshold = 0.35
-
+'''
 
 ## Feature Representation
 
