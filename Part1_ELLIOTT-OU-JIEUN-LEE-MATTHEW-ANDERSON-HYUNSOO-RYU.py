@@ -12,19 +12,19 @@ from skl2onnx import to_onnx
 from sklearn.metrics import (accuracy_score, average_precision_score, confusion_matrix,
                              f1_score, precision_score, recall_score, roc_auc_score)
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 from rdkit import Chem
 from rdkit.Chem import rdFingerprintGenerator, Descriptors, Lipinski, rdMolDescriptors
 
 
+RANDOM_SEED = 42
+
 # TODO 1: your group's names -> Part1_FIRST1-LAST1-FIRST2-LAST2.onnx
 NAME = "ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU"
 
-
 # TODO 2: your own threshold; justify it in README.md
-THRESHOLD = 0.5
+THRESHOLD = 0.35
 
+# A threshold of 0.35 will make it easier to label a compound as a hERG blocker. This will lose us some true negatives, but will help us find more true positives. This was chosen because the result of a false negative is someone being harmed by an incorrectly labeled drug, causing active harm. A false positive will only prevent a drug from being used out of an abundance of caution, which is a lost good.
 
 def featurize(smiles):
     """TODO 3: SMILES strings -> 2D float32 NumPy array, one row per molecule.
@@ -50,10 +50,13 @@ def featurize(smiles):
             raise ValueError(f"Invalid SMILES: {smi!r}")
 
         # Morgan fingerprint
-        fp = gen.GetFingerprint(mol)
-        # fp = np.zeros(2048, dtype=np.float32)
+        fp = np.array(gen.GetFingerprint(mol), dtype=np.float32)
         
-        # Global physicochemical features
+        atoms = Chem.Mol.GetAtoms(mol)
+        positive_atoms = sum(atom.GetFormalCharge() > 0 for atom in atoms)
+        negative_atoms = sum(atom.GetFormalCharge() < 0 for atom in atoms)
+        halogen_count = sum(atom.GetAtomicNum() in {9, 17, 35, 53} for atom in atoms)
+
         descriptors = np.array([
             Descriptors.MolWt(mol),
             Descriptors.MolLogP(mol),
@@ -65,6 +68,10 @@ def featurize(smiles):
             rdMolDescriptors.CalcNumAromaticRings(mol),
             rdMolDescriptors.CalcFractionCSP3(mol),
             Chem.GetFormalCharge(mol),
+            mol.GetNumHeavyAtoms(),
+            positive_atoms,
+            negative_atoms,
+            halogen_count,
         ], dtype=np.float32)
 
         features.append(np.concatenate([fp, descriptors]))
@@ -72,39 +79,32 @@ def featurize(smiles):
     return np.asarray(features, dtype=np.float32)
 
 
-## Parameter Grid - set to the optimal single values 
-TREES = 250
-DEPTH = 100
-
-
-def build_model():
+def build_model(seed=RANDOM_SEED):
     ## TODO 4: Return your model using RandomForestClassifier
-    return make_pipeline(
-        StandardScaler(),
-        RandomForestClassifier(
-            n_estimators=TREES,
-            max_depth=DEPTH,
-            random_state=42,
-            class_weight='balanced',
-            n_jobs=-1
-        )
-    )
+    
+    model = RandomForestClassifier(
+                n_estimators=250,
+                random_state=seed,
+                class_weight='balanced',
+                n_jobs=-1
+            )
+
+    return model
 
 
 def save_onnx(model, sample):
     ## reduce tree to fit less than 50MB onnx model
-    from skl2onnx import to_onnx
     Path("Part1_%s.onnx" % NAME).write_bytes(
         to_onnx(model, sample, options={"zipmap": False}, target_opset=12).SerializeToString())
     print("\nwrote Part1_%s.onnx" % NAME)
 
 
-def load_split():
+def load_split(seed=RANDOM_SEED):
     df = pd.read_csv("data/hw1data.tab", sep="\t")
     df.columns = ["Drug_ID", "Drug", "Y"]
-    test = df.sample(frac=0.2, random_state=42)
+    test = df.sample(frac=0.2, random_state=seed)
     rest = df.drop(test.index)
-    valid = rest.sample(frac=0.125, random_state=1)
+    valid = rest.sample(frac=0.125, random_state=seed)
     train = rest.drop(valid.index)
     return {
         "train": train,
@@ -145,5 +145,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-  
