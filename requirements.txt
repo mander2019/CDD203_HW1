@@ -8,6 +8,7 @@ scikit-learn==1.6.1
 onnxruntime==1.19.2
 skl2onnx==1.20.0
 gradio==5.35.0
+rdkit==2023.9.6
 
 # Use the versions in requirements.txt and don’t change them. 
 # You may add only these, at exactly these versions: 
