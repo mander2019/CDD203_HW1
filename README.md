@@ -4,7 +4,7 @@ Group member names: Elliott Ou, Jieun Lee, Matthew Anderson, Hyunsoo Ryu
 
 ## Web App
 
-Hugging Face Space: https://huggingface.co/spaces/m-anderson/hw1-herg-blockade-classifier
+Find the online implementation of our model [here](https://cdd203hw1.streamlit.app/)
 
 ## Model Settings
 
