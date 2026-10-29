@@ -2,10 +2,12 @@
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+import random
 
 import numpy as np
 import onnxruntime as ort
 from rdkit import Chem
+from rdkit.Chem import Draw
 import streamlit as st
 
 
@@ -32,6 +34,34 @@ def score_smiles(smiles, part1, session, model_input):
     return float(output[0, 1] if output.ndim == 2 and output.shape[1] == 2 else output.ravel()[0])
 
 
+def random_smiles():
+    """Generate a varied, RDKit-valid SMILES string."""
+    substituents = ["C", "CC", "CCC", "O", "OC", "N", "NC", "F", "Cl", "Br", "C(F)(F)F", "C(=O)O", "C(=O)N"]
+    terminal_groups = ["", "O", "N", "F", "Cl", "Br", "C(=O)O", "C(=O)N"]
+    for _ in range(40):
+        choice = random.randrange(6)
+        if choice == 0:
+            candidate = "C" * random.randint(2, 12) + random.choice(terminal_groups)
+        elif choice == 1:
+            candidate = "C" * random.randint(1, 5) + "C(C)" + "C" * random.randint(1, 5)
+        elif choice == 2:
+            candidate = f"c1cc({random.choice(substituents)})c({random.choice(substituents)})cc1{random.choice(substituents)}"
+        elif choice == 3:
+            candidate = f"n1cc({random.choice(substituents)})ccc1{random.choice(substituents)}"
+        elif choice == 4:
+            candidate = "C1CCCCC1" + random.choice(terminal_groups)
+        else:
+            candidate = "N1CCNCC1" + random.choice(terminal_groups)
+        molecule = Chem.MolFromSmiles(candidate)
+        if molecule is not None:
+            return Chem.MolToSmiles(molecule)
+    raise RuntimeError("Could not generate a valid SMILES string.")
+
+
+def set_random_smiles():
+    st.session_state["smiles"] = random_smiles()
+
+
 st.set_page_config(page_title="hERG Blockade Classifier", page_icon="🧬", layout="centered")
 st.title("hERG Blockade Classifier")
 st.caption("Enter a SMILES string to estimate hERG-blocker probability.")
@@ -42,7 +72,9 @@ except Exception as error:
     st.error(f"The model could not load: {error}")
     st.stop()
 
-smiles = st.text_area("SMILES", value="CC(=O)Oc1ccccc1C(=O)O", height=100)
+if "smiles" not in st.session_state:
+    st.session_state["smiles"] = "CC(=O)Oc1ccccc1C(=O)O"
+smiles = st.text_area("SMILES", height=100, key="smiles")
 smiles = smiles.strip()
 mol = Chem.MolFromSmiles(smiles) if smiles else None
 is_valid = mol is not None
@@ -53,6 +85,11 @@ elif not is_valid:
     st.error("Enter a valid SMILES string. Prediction is disabled until the structure is valid.")
 else:
     st.success("Valid SMILES. Ready to predict.")
+
+st.button("Randomize SMILES", on_click=set_random_smiles)
+
+if is_valid:
+    st.image(Draw.MolToImage(mol, size=(420, 260)), caption="SMILES structure")
 
 if st.button("Predict hERG blockade", type="primary", disabled=not is_valid):
     try:
