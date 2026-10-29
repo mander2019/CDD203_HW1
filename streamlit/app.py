@@ -78,13 +78,13 @@ elif not is_valid:
 else:
     st.success("Valid SMILES. Ready to predict.")
 
-if is_valid:
-    st.image(Draw.MolToImage(mol, size=(420, 260)), caption="SMILES structure")
-
 randomize_column, predict_column = st.columns(2)
 randomize_column.button("Randomize SMILES", on_click=set_random_smiles, use_container_width=True)
 predict_clicked = predict_column.button("Predict hERG blockade", type="primary", disabled=not is_valid,
                                         use_container_width=True)
+
+if is_valid:
+    st.image(Draw.MolToImage(mol, size=(420, 260)), caption="SMILES structure")
 
 if predict_clicked:
     try:
