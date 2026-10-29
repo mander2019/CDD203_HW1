@@ -62,7 +62,7 @@ Command:
 python TestModel.py Part1_ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU.py
 ```
 
-esult summary:
+Result summary:
 
 ```text
 PASS  NAME is filled in (ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU)
