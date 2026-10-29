@@ -130,9 +130,8 @@ def package_web_app(model, sample):
 
     archive_path = Path("Part 2.zip")
     web_app_files = [
-        Path("streamlit_app.py"),
-        Path("requirements.txt"),
-        Path("runtime.txt"),
+        Path("streamlit/app.py"),
+        Path("streamlit/requirements.txt"),
         Path("Part1_%s.py" % NAME),
         onnx_path,
     ]
@@ -140,7 +139,7 @@ def package_web_app(model, sample):
         for path in web_app_files:
             if not path.is_file():
                 raise FileNotFoundError("Expected the Streamlit web app file at %s" % path)
-            archive.write(path, path.name)
+            archive.write(path, path.as_posix())
     print("wrote %s" % archive_path)
 
 

@@ -9,7 +9,7 @@ from rdkit import Chem
 import streamlit as st
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 PART1_PATH = ROOT / "Part1_ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU.py"
 MODEL_PATH = ROOT / "Part1_ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU.onnx"
 
