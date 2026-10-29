@@ -69,7 +69,7 @@ PASS  NAME is filled in (ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU)
 PASS  THRESHOLD is between 0 and 1 and is not 0.5 (0.35)
 PASS  featurize returns a 2-D array with one row per molecule (6, 2069)
 PASS  features are all finite numbers (no NaN or infinity)
-PASS  PyTorch models loaded at the top of your script have at most 150M parameters (0.0M)
+PASS  PyTorch models loaded script have at most 150M parameters 
 PASS  Part1_ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU.onnx is at most 50 MB (43.8 MB)
 PASS  the ONNX model has exactly one input
 PASS  the model returns one prediction per molecule
