@@ -4,11 +4,11 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 import random
 
+import numpy as np
 import onnxruntime as ort
 from rdkit import Chem
 from rdkit.Chem import Draw
 import streamlit as st
-from predictor import score_smiles
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +24,14 @@ def load_model():
     spec.loader.exec_module(part1)
     session = ort.InferenceSession(str(MODEL_PATH), providers=["CPUExecutionProvider"])
     return part1, session, session.get_inputs()[0]
+
+
+def score_smiles(smiles, part1, session, model_input):
+    """Return P(hERG blocker) from the submitted featurizer and ONNX model."""
+    features = part1.featurize([smiles])
+    dtype = {"tensor(double)": np.float64, "tensor(int64)": np.int64}.get(model_input.type, np.float32)
+    output = np.asarray(session.run(None, {model_input.name: np.asarray(features, dtype)})[-1], float)
+    return float(output[0, 1] if output.ndim == 2 and output.shape[1] == 2 else output.ravel()[0])
 
 
 def random_smiles():

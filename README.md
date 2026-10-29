@@ -10,14 +10,6 @@ Find the online implementation of our model [here](https://cdd203hw1.streamlit.a
 
 The final model uses a scikit-learn implementation of `RandomForestClassifier`.
 
-- n_estimators = 300
-- max_depth = 20
-- min_samples_leaf = 2
-- class_weight = balanced
-- random_state = 42
-- threshold = 0.35
-
-
 ## Feature Representation
 
 TODO

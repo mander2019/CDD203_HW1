@@ -131,7 +131,6 @@ def package_web_app(model, sample):
     archive_path = Path("Part 2.zip")
     web_app_files = [
         Path("streamlit/app.py"),
-        Path("streamlit/predictor.py"),
         Path("streamlit/requirements.txt"),
         Path("packages.txt"),
         Path("Part1_%s.py" % NAME),
