@@ -132,6 +132,7 @@ def package_web_app(model, sample):
     web_app_files = [
         Path("streamlit/app.py"),
         Path("streamlit/requirements.txt"),
+        Path("packages.txt"),
         Path("Part1_%s.py" % NAME),
         onnx_path,
     ]
