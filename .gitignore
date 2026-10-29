@@ -1,2 +1,7 @@
 .DS_Store
 *.onnx
+space-static
+.agents
+__pycache__
+!Part1_ELLIOTT-OU-JIEUN-LEE-MATTHEW-ANDERSON-HYUNSOO-RYU.onnx
+runtime.txt

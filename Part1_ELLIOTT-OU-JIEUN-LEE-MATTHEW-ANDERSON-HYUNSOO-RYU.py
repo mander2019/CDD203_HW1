@@ -6,6 +6,9 @@ then run: python Part1_[GROUP_NAMES].py
 """
 
 from pathlib import Path
+import gzip
+import shutil
+import zipfile
 import numpy as np
 import pandas as pd
 from skl2onnx import to_onnx
@@ -45,30 +48,42 @@ def featurize(smiles):
 
     for smi in smiles:
         mol = Chem.MolFromSmiles(smi)
-
         if mol is None:
             raise ValueError(f"Invalid SMILES: {smi!r}")
 
-        # Morgan fingerprint
-        fp = np.array(gen.GetFingerprint(mol), dtype=np.float32)
-        
-        atoms = Chem.Mol.GetAtoms(mol)
+        fp = np.asarray(gen.GetFingerprint(mol), dtype=np.float32)
+
+        atoms = mol.GetAtoms()
         positive_atoms = sum(atom.GetFormalCharge() > 0 for atom in atoms)
         negative_atoms = sum(atom.GetFormalCharge() < 0 for atom in atoms)
         halogen_count = sum(atom.GetAtomicNum() in {9, 17, 35, 53} for atom in atoms)
 
-        descriptors = np.array([
+        descriptors = np.asarray([
+            # Size, lipophilicity, and polarity
             Descriptors.MolWt(mol),
             Descriptors.MolLogP(mol),
+            Descriptors.MolMR(mol),
             rdMolDescriptors.CalcTPSA(mol),
+            mol.GetNumHeavyAtoms(),
+
+            # Hydrogen-bonding and heteroatom features
             Lipinski.NumHDonors(mol),
             Lipinski.NumHAcceptors(mol),
+            Lipinski.NumHeteroatoms(mol),
+            Lipinski.NHOHCount(mol),
+            Lipinski.NOCount(mol),
+
+            # Topology and flexibility
             Lipinski.NumRotatableBonds(mol),
             rdMolDescriptors.CalcNumRings(mol),
-            rdMolDescriptors.CalcNumAromaticRings(mol),
+            Lipinski.NumAliphaticRings(mol),
+            Lipinski.NumSaturatedRings(mol),
+            Lipinski.NumAromaticCarbocycles(mol),
+            Lipinski.NumAromaticHeterocycles(mol),
             rdMolDescriptors.CalcFractionCSP3(mol),
+
+            # Charge and atom-composition features
             Chem.GetFormalCharge(mol),
-            mol.GetNumHeavyAtoms(),
             positive_atoms,
             negative_atoms,
             halogen_count,
@@ -94,9 +109,39 @@ def build_model(seed=RANDOM_SEED):
 
 def save_onnx(model, sample):
     ## reduce tree to fit less than 50MB onnx model
-    Path("Part1_%s.onnx" % NAME).write_bytes(
+    onnx_path = Path("Part1_%s.onnx" % NAME)
+    onnx_path.write_bytes(
         to_onnx(model, sample, options={"zipmap": False}, target_opset=12).SerializeToString())
-    print("\nwrote Part1_%s.onnx" % NAME)
+    print("\nwrote %s" % onnx_path)
+    return onnx_path
+
+
+def package_web_app(model, sample):
+    """Export the trained model, refresh the Space files, and build Part 2.zip."""
+    onnx_path = save_onnx(model, sample)
+    space_dir = Path("space-static")
+    if not space_dir.is_dir():
+        raise FileNotFoundError("Expected the web app folder at %s" % space_dir)
+
+    space_model = space_dir / "model.onnx"
+    shutil.copy2(onnx_path, space_model)
+    with space_model.open("rb") as source, gzip.open(space_dir / "model.onnx.gz", "wb", compresslevel=9) as target:
+        shutil.copyfileobj(source, target)
+
+    archive_path = Path("Part 2.zip")
+    web_app_files = [
+        Path("streamlit_app.py"),
+        Path("requirements.txt"),
+        Path("runtime.txt"),
+        Path("Part1_%s.py" % NAME),
+        onnx_path,
+    ]
+    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for path in web_app_files:
+            if not path.is_file():
+                raise FileNotFoundError("Expected the Streamlit web app file at %s" % path)
+            archive.write(path, path.name)
+    print("wrote %s" % archive_path)
 
 
 def load_split(seed=RANDOM_SEED):
@@ -140,7 +185,7 @@ def main():
     probability = model.predict_proba(X_test)[:, 1]
     report(y_test, probability, 0.5)
     report(y_test, probability, THRESHOLD)
-    save_onnx(model, X_test[:1])
+    package_web_app(model, X_test[:1])
 
 
 if __name__ == "__main__":

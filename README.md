@@ -2,12 +2,13 @@
 
 Group member names: Elliott Ou, Jieun Lee, Matthew Anderson, Hyunsoo Ryu
 
+## Web App
 
+Hugging Face Space: https://huggingface.co/spaces/m-anderson/hw1-herg-blockade-classifier
 
 ## Model Settings
 
-The final model uses a scikit-learn pipeline with `StandardScaler()` followed by `RandomForestClassifier`.
-
+The final model uses a scikit-learn implementation of `RandomForestClassifier`.
 
 - n_estimators = 300
 - max_depth = 20
@@ -19,7 +20,7 @@ The final model uses a scikit-learn pipeline with `StandardScaler()` followed by
 
 ## Feature Representation
 
-Each input SMILES string is converted to a canonical RDKit SMILES string, then encoded as a fixed-length vector of length `200`. Each character in the canonical SMILES is mapped to an integer ID learned from the dataset, and positions beyond the molecule length are padded with zeroes. This produces a two-dimensional `float32` NumPy array with one row per molecule, which is compatible with scikit-learn and ONNX export.
+TODO
 
 ## Command
 
@@ -54,4 +55,3 @@ threshold 0.35
   ROC-AUC             0.792
   PR-AUC              0.803
 ```
-
