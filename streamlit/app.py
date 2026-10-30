@@ -104,7 +104,10 @@ if predict_clicked:
 if is_valid and st.session_state.get("scored_smiles") == smiles and "probability" in st.session_state:
     probability = st.session_state["probability"]
     prediction = "Potential hERG blocker" if probability >= part1.THRESHOLD else "Not flagged as a hERG blocker"
-    left, right = st.columns(2)
-    left.metric("Blocker probability", f"{probability:.1%}")
-    right.metric("Predicted class", prediction)
+    st.metric("Blocker probability", f"{probability:.1%}")
+    st.markdown("#### Predicted class")
+    if probability >= part1.THRESHOLD:
+        st.warning(prediction)
+    else:
+        st.success(prediction)
     st.caption(f"Decision threshold: {part1.THRESHOLD:.2f}")
