@@ -73,7 +73,7 @@ except Exception as error:
     st.stop()
 
 if "smiles" not in st.session_state:
-    st.session_state["smiles"] = "CN(CC(=O)O)C(=N)N.O"
+    st.session_state["smiles"] = "CN(CC(=O)O)C(=N)N"
 smiles = st.text_area("SMILES", height=100, key="smiles")
 smiles = smiles.strip()
 mol = Chem.MolFromSmiles(smiles) if smiles else None
