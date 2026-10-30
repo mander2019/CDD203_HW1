@@ -13,7 +13,7 @@ The submitted ONNX model is trained on all rows in `data/hw1data.tab`; no test s
 
 ## Feature Representation
 
-Each molecule is represented using a combination of RDki functions / features such as Morgan fingerprint. Morgan fingerprint converts the molecule into 2048 numbers that represent small structural patterns in the molecule, and rdkit implements features that describe properties of the molecule such as molecular weight, polarity, charge, number of rings, and hydrogen-bonding ability.
+Each molecule is represented using a combination of RDkit functions / features such as Morgan fingerprint. Morgan fingerprint converts the molecule into 2048 numbers that represent small structural patterns in the molecule, and RDkit implements features that describe properties of the molecule such as molecular weight, polarity, charge, number of rings, and hydrogen-bonding ability.
 
 
 ## Command
@@ -35,25 +35,10 @@ During threshold selection on an earlier assignment-provided split, threshold `0
 
 ## Test Results
 
-```text
-threshold 0.50
-  accuracy            0.842
-  sensitivity/recall  0.846
-  specificity         0.837
-  precision           0.850
-  f1                  0.848
-  ROC-AUC             0.918
-  PR-AUC              0.925
-
-threshold 0.35
-  accuracy            0.820
-  sensitivity/recall  0.927
-  specificity         0.702
-  precision           0.773
-  f1                  0.843
-  ROC-AUC             0.918
-  PR-AUC              0.925
-```
+| Threshold | Accuracy | Sensitivity / Recall | Specificity | Precision | F1 | ROC-AUC | PR-AUC |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| **0.50** | 0.842 | 0.846 | 0.837 | 0.850 | 0.848 | 0.918 | 0.925 |
+| **0.35** | 0.820 | 0.927 | 0.702 | 0.773 | 0.843 | 0.918 | 0.925 |
 
 ## Checker Result
 
