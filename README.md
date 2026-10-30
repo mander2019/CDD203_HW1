@@ -13,7 +13,8 @@ The submitted ONNX model is trained on all rows in `data/hw1data.tab`; no test s
 
 ## Feature Representation
 
-TODO
+Each molecule is represented using a combination of RDki functions / features such as Morgan fingerprint. Morgan fingerprint converts the molecule into 2048 numbers that represent small structural patterns in the molecule, and rdkit implements features that describe properties of the molecule such as molecular weight, polarity, charge, number of rings, and hydrogen-bonding ability.
+
 
 ## Command
 
