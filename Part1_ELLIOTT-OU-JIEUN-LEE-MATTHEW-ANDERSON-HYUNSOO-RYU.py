@@ -6,8 +6,6 @@ then run: python Part1_[GROUP_NAMES].py
 """
 
 from pathlib import Path
-import gzip
-import shutil
 import zipfile
 import numpy as np
 import pandas as pd
@@ -119,14 +117,6 @@ def save_onnx(model, sample):
 def package_web_app(model, sample):
     """Export the trained model, refresh the Space files, and build Part 2.zip."""
     onnx_path = save_onnx(model, sample)
-    space_dir = Path("space-static")
-    if not space_dir.is_dir():
-        raise FileNotFoundError("Expected the web app folder at %s" % space_dir)
-
-    space_model = space_dir / "model.onnx"
-    shutil.copy2(onnx_path, space_model)
-    with space_model.open("rb") as source, gzip.open(space_dir / "model.onnx.gz", "wb", compresslevel=9) as target:
-        shutil.copyfileobj(source, target)
 
     archive_path = Path("Part 2.zip")
     web_app_files = [
